@@ -106,6 +106,23 @@ ipcMain.on("run-bot", async (event, settings) => {
       waitUntil: "networkidle2",
     });
 
+    /* Don't want to open my cases yet
+
+    const caseButtons = await page.evaluate(() => {
+      const buttons = [...document.querySelectorAll(".grid button")];
+      return buttons
+        .filter((btn) => !btn.disabled)
+        .map((btn, index) => {
+          return `.grid button:nth-of-type(${index + 1})`;
+        });
+    });
+    console.log("Grid contents:\n", gridHTML);
+
+    for (const button of caseButtons) {
+      await page.click(button);
+      await page.waitForTimeout(1000); // wait between case openings
+    }
+*/
     // TODO: Auto-stash and risk-based logic goes here
 
     // await browser.close();
