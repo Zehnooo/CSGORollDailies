@@ -17,11 +17,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
 ipcRenderer.on("show-settings", () => {
   document.body.innerHTML = `
-    <h2>Settings</h2>
-    <label><input type="checkbox" id="autoStash" /> Auto Stash Coins</label><br>
-    <label>Risk %: <input type="range" id="risk" min="1" max="100" value="50" /></label><br>
-    <button id="runBot">Run Bot</button>
-  `;
+  <h2>Bot Settings</h2>
+  <label>
+    <input type="checkbox" id="autoStash" />
+    Deposit Earnings to Stash
+  </label>
+  <br />
+
+  <label for="risk">Case Risk %:</label>
+  <select id="risk">
+    <option value="5">5%</option>
+    <option value="10">10%</option>
+    <option value="20">20%</option>
+    <option value="25">25%</option>
+    <option value="40">40%</option>
+    <option value="50">50%</option>
+    <option value="60">60%</option>
+  </select>
+  <br />
+  <button id="runBot">Run Bot</button>
+`;
 
   document.getElementById("runBot").addEventListener("click", () => {
     const autoStash = document.getElementById("autoStash").checked;

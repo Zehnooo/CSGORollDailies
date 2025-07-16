@@ -106,6 +106,59 @@ ipcMain.on("run-bot", async (event, settings) => {
       waitUntil: "networkidle2",
     });
 
+    riskPercent = userSettings.risk;
+
+    const riskMap = {
+      5: 0.0,
+      10: 0.17,
+      20: 0.34,
+      25: 0.51,
+      40: 0.68,
+      50: 0.85,
+      60: 1.0,
+    };
+
+    const riskNormalized = riskMap[userSettings.risk];
+
+    const slider = await page.$(".mdc-slider");
+
+    await slider.evaluate((el) =>
+      el.scrollIntoView({ behavior: "instant", block: "center" })
+    );
+
+    const box = await slider.boundingBox();
+
+    if (box) {
+      const { x, y, width, height } = box;
+
+      const riskMap = {
+        5: 0.0,
+        10: 0.17,
+        20: 0.34,
+        25: 0.51,
+        40: 0.68,
+        50: 0.85,
+        60: 1.0,
+      };
+
+      const riskNormalized = riskMap[userSettings.risk];
+      const buffer = 5;
+
+      const startX = x + buffer;
+      const targetX = x + buffer + (width - buffer * 2) * riskNormalized;
+      const centerY = y + height / 2;
+
+      await page.mouse.move(0, 0); // <-- prevents selection behavior
+      await page.mouse.move(startX, centerY);
+      await page.mouse.down();
+      await page.mouse.move(targetX, centerY, { steps: 20 });
+      await page.mouse.up();
+
+      console.log(`Slider set to ${userSettings.risk}%`);
+    } else {
+      console.error("Slider bounding box not found.");
+    }
+
     /* Don't want to open my cases yet
 
     const caseButtons = await page.evaluate(() => {
