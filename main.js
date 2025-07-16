@@ -102,9 +102,13 @@ ipcMain.on("run-bot", async (event, settings) => {
     await page.waitForNavigation({ waitUntil: "networkidle2" });
     console.log("Login complete");
 
+    await page.goto("https://www.csgoroll.com/cases/daily-free", {
+      waitUntil: "networkidle2",
+    });
+
     // TODO: Auto-stash and risk-based logic goes here
 
-    await browser.close();
+    // await browser.close();
   } catch (err) {
     console.error("Puppeteer run failed:", err);
   }
