@@ -1,25 +1,31 @@
-# Node modules
+# Node dependencies
 node_modules/
+
+# Tailwind output
+styles.css
+styles.css.map
+
+# Build artifacts (if using electron-packager, electron-builder, etc.)
+dist/
+out/
+
+# OS junk
+.DS_Store
+Thumbs.db
 
 # Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# OS crap
-.DS_Store
-Thumbs.db
+# Optional: Tailwind CLI temp (if you're doing weird custom builds)
+.tailwind-output.css
 
-# Electron build output (if you use something like electron-builder later)
-dist/
-out/
-build/
-
-# Environment variables (if you use them)
-.env
-
-# Optional: VSCode settings
+# IDE/editor specific
 .vscode/
+.idea/
+*.swp
+
 
 readme.md
 test.html
