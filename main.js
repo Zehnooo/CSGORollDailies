@@ -23,25 +23,27 @@ function createWindow() {
 
   mainWindow.loadFile("index.html");
 
-  mainWindow.webContents.on("did-finish-load", async () => {
-    const savedEmail = store.get("email");
+  mainWindow.webContents.on("did-finish-load", () => {
+    (async () => {
+      const savedEmail = store.get("email");
 
-    if (savedEmail) {
-      try {
-        const savedPassword = await keytar.getPassword(
-          "CSGORollBot",
-          savedEmail
-        );
-        if (savedPassword) {
-          mainWindow.webContents.send("load-credentials", {
-            email: savedEmail,
-            password: savedPassword,
-          });
+      if (savedEmail) {
+        try {
+          const savedPassword = await keytar.getPassword(
+            "CSGORollBot",
+            savedEmail
+          );
+          if (savedPassword) {
+            mainWindow.webContents.send("load-credentials", {
+              email: savedEmail,
+              password: savedPassword,
+            });
+          }
+        } catch (err) {
+          console.error("Failed to load credentials:", err);
         }
-      } catch (err) {
-        console.error("Failed to load credentials:", err);
       }
-    }
+    })();
   });
 }
 

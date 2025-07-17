@@ -1,60 +1,63 @@
 <!DOCTYPE html>
-<html class="p-0 m-0">
+<html lang="en" class="p-0 m-0">
   <head>
     <meta charset="UTF-8" />
     <meta
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; script-src 'self';"
     />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
-
     <title>CSGORoll Bot</title>
   </head>
-  <body class="text-white bg-gray-900 font-mono">
-    <div>
-      <header class="bg-indigo-900 p-2 select-none">
-        <span>CSGORoll Daily Case Bot </span>
-      </header>
-      <div
-        class="flex flex-col mx-auto my-0 items-center justify-center text-center p-6"
+  <body
+    class="bg-gray-900 text-white font-mono min-h-screen flex items-center justify-center"
+  >
+    <div class="w-full max-w-md bg-gray-800 p-6 rounded-lg shadow-lg">
+      <header
+        class="bg-indigo-900 rounded-md p-3 text-center text-lg font-semibold select-none mb-6"
       >
-        <div class="p-4 select-none">
-          <h1 class="text-2xl">Welcome back</h1>
-          <p class="text-xl">Please enter your CSGORoll alternate login</p>
-        </div>
-        <form id="loginForm" class="mx-auto my-0">
-          <div class="flex flex-col">
-            <label for="email" class="mb-2 p-2 text-left">Email Address</label>
-            <input
-              class="p-2 mb-2 focus:scale-105 rounded-md text-black border-2 border-indigo-400 focus:outline-none focus:border-blue-800 transition-all ease-in-out"
-              type="email"
-              id="email"
-              required
-            /><br />
-          </div>
-          <div class="flex flex-col">
-            <label for="password" class="mb-2 p-2 text-left">Password</label>
-            <input
-              class="p-2 mb-2 focus:scale-105 rounded-md text-black border-2 border-indigo-400 focus:outline-none focus:border-blue-800 transition-all ease-in-out"
-              type="password"
-              id="password"
-              required
-            /><br />
-          </div>
-          <div class="mb-4 flex justify-evenly text-center">
-            <label for="rememberMe" class="select-none">Remember me</label>
-            <input type="checkbox" id="rememberMe" />
-            <br />
-          </div>
+        CSGORoll Daily Case Bot
+      </header>
 
-          <button
-            type="submit"
-            class="shadow-md rounded-md bg-indigo-900 p-2 hover:bg-blue-800"
-          >
-            Log In
-          </button>
-        </form>
+      <div class="text-center mb-6 select-none">
+        <h1 class="text-2xl font-bold mb-2">Welcome back</h1>
+        <p class="text-lg">Please enter your CSGORoll alternate login</p>
       </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="email" class="block text-left mb-1">Email Address</label>
+          <input
+            id="email"
+            type="email"
+            required
+            class="w-full p-2 rounded-md text-black border-2 border-indigo-400 focus:outline-none focus:border-blue-800 transition-all ease-in-out focus:scale-105"
+          />
+        </div>
+
+        <div>
+          <label for="password" class="block text-left mb-1">Password</label>
+          <input
+            id="password"
+            type="password"
+            required
+            class="w-full p-2 rounded-md text-black border-2 border-indigo-400 focus:outline-none focus:border-blue-800 transition-all ease-in-out focus:scale-105"
+          />
+        </div>
+
+        <div class="flex items-center justify-between">
+          <label for="rememberMe" class="select-none">Remember me</label>
+          <input type="checkbox" id="rememberMe" class="h-5 w-5" />
+        </div>
+
+        <button
+          type="submit"
+          class="w-full p-2 rounded-md bg-indigo-900 hover:bg-blue-800 transition ease-in-out hover:scale-105 hover:translate-y-1 font-semibold shadow-md"
+        >
+          Log In
+        </button>
+      </form>
     </div>
 
     <script src="renderer.js"></script>

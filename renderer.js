@@ -29,25 +29,39 @@ ipcRenderer.on("load-credentials", (event, creds) => {
 
 ipcRenderer.on("show-settings", () => {
   document.body.innerHTML = `
-  <h2>Bot Settings</h2>
-  <label>
-    <input type="checkbox" id="autoStash" />
-    Deposit Earnings to Stash
-  </label>
-  <br />
+  <div class="min-h-screen bg-gray-900 text-white font-mono flex items-center justify-center p-4">
+    <div class="bg-gray-800 shadow-lg rounded-lg p-6 max-w-md w-full space-y-6">
+      <h2 class="text-2xl font-bold text-indigo-300 text-center">Bot Settings</h2>
 
-  <label for="risk">Case Risk %:</label>
-  <select id="risk" class="p-2 mb-2 focus:scale-105 rounded-md text-black border-2 border-indigo-400 focus:outline-none focus:border-blue-800 transition-all ease-in-out">
-    <option value="5">5%</option>
-    <option value="10">10%</option>
-    <option value="20">20%</option>
-    <option value="25">25%</option>
-    <option value="40">40%</option>
-    <option value="50">50%</option>
-    <option value="60">60%</option>
-  </select>
-  <br />
-  <button id="runBot" class="shadow-md rounded-md bg-indigo-900 p-2 hover:bg-blue-800">Run Bot</button>
+      <div class="flex items-center space-x-2">
+        <input type="checkbox" id="autoStash" class="h-5 w-5 text-indigo-600 border-gray-300 rounded" />
+        <label for="autoStash" class="text-white font-medium">Deposit Earnings to Stash</label>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="risk" class="mb-1 text-white font-medium">Case Risk %</label>
+        <select
+          id="risk"
+          class="p-2 rounded-md text-black border border-indigo-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+        >
+          <option value="5">5%</option>
+          <option value="10">10%</option>
+          <option value="20">20%</option>
+          <option value="25">25%</option>
+          <option value="40">40%</option>
+          <option value="50">50%</option>
+          <option value="60">60%</option>
+        </select>
+      </div>
+
+      <button
+        id="runBot"
+        class="w-full py-2 px-4 bg-indigo-900 text-white font-semibold rounded-md hover:bg-blue-800 transition hover:scale-105"
+      >
+        Run Bot
+      </button>
+    </div>
+  </div>
 `;
 
   document.getElementById("runBot").addEventListener("click", () => {
