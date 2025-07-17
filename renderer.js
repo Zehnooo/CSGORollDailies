@@ -25,7 +25,7 @@ ipcRenderer.on("show-settings", () => {
   <br />
 
   <label for="risk">Case Risk %:</label>
-  <select id="risk">
+  <select id="risk" class="p-2 mb-2 focus:scale-105 rounded-md text-black border-2 border-indigo-400 focus:outline-none focus:border-blue-800 transition-all ease-in-out">
     <option value="5">5%</option>
     <option value="10">10%</option>
     <option value="20">20%</option>
@@ -35,7 +35,7 @@ ipcRenderer.on("show-settings", () => {
     <option value="60">60%</option>
   </select>
   <br />
-  <button id="runBot">Run Bot</button>
+  <button id="runBot" class="shadow-md rounded-md bg-indigo-900 p-2 hover:bg-blue-800">Run Bot</button>
 `;
 
   document.getElementById("runBot").addEventListener("click", () => {
