@@ -11,12 +11,20 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
-    const rememberMe = document.getElementById("rememberMe");
-    if (rememberMe.isChecked) {
-    }
+    const rememberMe = document.getElementById("rememberMe").checked;
 
-    ipcRenderer.send("credentials-entered", { email, password });
+    ipcRenderer.send("credentials-entered", {
+      email,
+      password,
+      remember: rememberMe,
+    });
   });
+});
+
+ipcRenderer.on("load-credentials", (event, creds) => {
+  document.getElementById("email").value = creds.email || "";
+  document.getElementById("password").value = creds.password || "";
+  document.getElementById("rememberMe").checked = true;
 });
 
 ipcRenderer.on("show-settings", () => {

@@ -2,6 +2,10 @@ const { app, BrowserWindow, ipcMain } = require("electron");
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const path = require("path");
+const Store = require("electron-store");
+const keytar = require("keytar");
+
+const store = new Store();
 
 puppeteer.use(StealthPlugin());
 
@@ -18,6 +22,27 @@ function createWindow() {
   });
 
   mainWindow.loadFile("index.html");
+
+  mainWindow.webContents.on("did-finish-load", async () => {
+    const savedEmail = store.get("email");
+
+    if (savedEmail) {
+      try {
+        const savedPassword = await keytar.getPassword(
+          "CSGORollBot",
+          savedEmail
+        );
+        if (savedPassword) {
+          mainWindow.webContents.send("load-credentials", {
+            email: savedEmail,
+            password: savedPassword,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to load credentials:", err);
+      }
+    }
+  });
 }
 
 app.whenReady().then(createWindow);
@@ -31,11 +56,29 @@ let userSettings = {
 };
 
 // --- Step 1: After user submits login form ---
-ipcMain.on("credentials-entered", (event, credentials) => {
-  userSettings.email = credentials.email;
-  userSettings.password = credentials.password;
-  mainWindow.webContents.send("show-settings");
-});
+ipcMain.on(
+  "credentials-entered",
+  async (event, { email, password, remember }) => {
+    userSettings.email = email;
+    userSettings.password = password;
+
+    try {
+      if (remember) {
+        store.set("email", email);
+        await keytar.setPassword("CSGORollBot", email, password);
+        console.log("Credentials saved.");
+      } else {
+        store.delete("email");
+        await keytar.deletePassword("CSGORollBot", email);
+        console.log("Credentials cleared.");
+      }
+    } catch (err) {
+      console.error("Failed to save/clear credentials:", err);
+    }
+
+    mainWindow.webContents.send("show-settings");
+  }
+);
 
 // --- Step 2: When user clicks 'Run Bot' ---
 ipcMain.on("run-bot", async (event, settings) => {
