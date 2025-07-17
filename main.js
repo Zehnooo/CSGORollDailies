@@ -88,6 +88,7 @@ ipcMain.on(
 
 // --- Step 2: When user clicks 'Run Bot' ---
 ipcMain.on("run-bot", async (event, settings) => {
+  mainWindow.webContents.send("show-gallery");
   try {
     userSettings.autoStash = settings.autoStash;
     userSettings.risk = settings.risk;
