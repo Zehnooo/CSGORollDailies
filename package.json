@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "watch": "tailwindcss -i ./tailwind.css -o ./styles.css --watch"
   },
   "devDependencies": {
     "electron": "^29.0.0",
