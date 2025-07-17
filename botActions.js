@@ -1,5 +1,11 @@
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+const fs = require("fs");
+const path = require("path");
+const dayjs = require("dayjs");
+const isoWeek = require("dayjs/plugin/isoWeek");
+
+dayjs.extend(isoWeek);
 
 puppeteer.use(StealthPlugin());
 
@@ -89,9 +95,59 @@ async function setRiskSlider(page, risk) {
   console.log(`Slider set to ${risk}%`);
 }
 
+async function openDailyCases(page) {
+  try {
+    const caseSelectors = await page.evaluate(() => {
+      const buttons = [...document.querySelectorAll(".grid button")];
+      return buttons
+        .filter((btn) => !btn.disabled)
+        .map((btn, index) => `.grid button:nth-of-type(${index + 1})`);
+    });
+
+    console.log(`Found ${caseSelectors.length} cases to open.`);
+
+    for (const selector of caseSelectors) {
+      try {
+        await page.click(selector);
+        console.log(`Opened case: ${selector}`);
+        await page.waitForTimeout(1000); // Adjust delay if needed
+      } catch (err) {
+        console.warn(`Failed to click ${selector}`, err);
+      }
+    }
+  } catch (err) {
+    console.error("Failed to open daily cases:", err);
+  }
+}
+
+async function captureScreenshots(page) {
+  const currentWeek = dayjs().isoWeek();
+  const currentYear = dayjs().year();
+  const folderName = `${currentYear}-W${currentWeek}`;
+  const folderPath = path.join(__dirname, "screenshots", folderName);
+
+  const screenshotsRoot = path.join(__dirname, "screenshots");
+  fs.readdirSync(screenshotsRoot).forEach((dir) => {
+    const fullPath = path.join(screenshotsRoot, dir);
+    if (dir !== folderName && fs.lstatSync(fullPath).isDirectory()) {
+      fs.rmSync(fullPath, { recursive: true, force: true });
+      console.log(`Old screenshot folder deleted: ${dir}`);
+    }
+  });
+
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath, { recursive: true });
+  }
+
+  const screenshotFile = path.join(folderPath, `item-${Date.now()}.png`);
+  await page.screenshot({ path: screenshotFile });
+  console.log(`Saved screenshot: ${screenshotFile}`);
+}
+
 module.exports = {
   launchBrowser,
   loginToCSGORoll,
   navigateToDailyCases,
   setRiskSlider,
+  openDailyCases,
 };
