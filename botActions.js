@@ -131,13 +131,14 @@ async function openDailyCases(page) {
       await page.click(openBtnSelector);
 
       await page.waitForFunction(
-        (selector) => {
-          const btn = document.querySelector(selector);
-
-          return btn && btn.disabled;
+        () => {
+          const btn = document.querySelector(
+            'button[data-test="open-box-button"]'
+          );
+          const span = btn?.querySelector("span");
+          return span && !span.textContent.toLowerCase().includes("spinning");
         },
-        { timeout: 10000 },
-        openBtnSelector
+        { timeout: 10000 }
       );
 
       await delay(1000);
