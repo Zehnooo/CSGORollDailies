@@ -98,9 +98,6 @@ async function setRiskSlider(page, risk) {
   console.log(`Slider set to ${risk}%`);
 
   try {
-    await page
-      .waitForSelector(".grid", { hidden: true, timeout: 3000 })
-      .catch(() => {});
     await page.waitForSelector(".grid .card-wrapper", {
       visible: true,
       timeout: 5000,
@@ -114,6 +111,7 @@ async function setRiskSlider(page, risk) {
 
 async function openDailyCases(page) {
   while (true) {
+    await waitForGridReady(page);
     const caseLinks = await getUnlockedCaseLinks(page);
 
     if (caseLinks.length === 0) {
@@ -123,7 +121,30 @@ async function openDailyCases(page) {
 
     const caseUrl = caseLinks[0];
     console.log(`🧭 Navigating to: ${caseUrl}`);
-    await page.goto(caseUrl, { waitUntil: "networkidle2" });
+    try {
+      await page.waitForFunction(
+        () => {
+          const btn = document.querySelector(
+            'button[data-test="open-box-button"]'
+          );
+          return btn && !btn.disabled;
+        },
+        { timeout: 7000 }
+      );
+
+      console.log(`🎁 Clicking 'Open 1 time'`);
+      await page.click('button[data-test="open-box-button"]');
+
+      // Wait for item image (see Fix 3 from previous message)
+      await page.waitForSelector("img.item-preview", {
+        visible: true,
+        timeout: 10000,
+      });
+
+      await captureScreenshots(page);
+    } catch (err) {
+      console.warn("⚠️ Failed to open case or wait for reward:", err.message);
+    }
 
     const openBtnSelector = 'button[data-test="open-box-button"]';
     try {
@@ -134,7 +155,19 @@ async function openDailyCases(page) {
       console.log(`🎁 Clicking 'Open 1 time'`);
       await page.click(openBtnSelector);
 
-      await delay(8000);
+      try {
+        await page.waitForFunction(
+          () => {
+            const previewImg = document.querySelector("img.item-preview");
+            return (
+              previewImg && previewImg.complete && previewImg.naturalHeight > 0
+            );
+          },
+          { timeout: 10000 }
+        );
+      } catch (e) {
+        console.warn("⚠️ No reward image detected after opening case.");
+      }
 
       await captureScreenshots(page);
     } catch (err) {
@@ -145,10 +178,8 @@ async function openDailyCases(page) {
       waitUntil: "networkidle2",
     });
 
-    await page.waitForSelector(".grid .card-wrapper", {
-      visible: true,
-      timeout: 5000,
-    });
+    await waitForGridReady(page);
+
     await delay(1500);
   }
 }
@@ -179,16 +210,54 @@ async function captureScreenshots(page) {
 
 async function getUnlockedCaseLinks(page) {
   return await page.evaluate(() => {
-    return Array.from(document.querySelectorAll("a.img-container"))
-      .map((el) => el.href)
+    return Array.from(document.querySelectorAll(".box"))
+      .filter((box) => {
+        const openBtn = box.querySelector('button[data-test="open-case"]');
+        const freeText = box.innerText.includes("FREE");
+
+        if (!openBtn || openBtn.disabled) return false;
+        if (!freeText) return false;
+
+        // Make sure it's not a countdown or "Lvl X" requirement
+        const btnText = openBtn.innerText.toLowerCase();
+        if (btnText.includes("lvl") || /\d+[smhd]/.test(btnText)) return false;
+
+        return true;
+      })
+      .map((box) => {
+        const link = box.querySelector("a.img-container");
+        return link?.href;
+      })
       .filter(Boolean);
   });
 }
 
+async function waitForGridReady(page) {
+  try {
+    await page.waitForFunction(
+      () => {
+        const buttons = document.querySelectorAll(
+          'button[data-test="open-case"]'
+        );
+        return Array.from(buttons).some((btn) => !btn.disabled);
+      },
+      { timeout: 7000 }
+    );
+
+    const count = await page.$$eval(
+      'button[data-test="open-case"]:not([disabled])',
+      (btns) => btns.length
+    );
+    console.log(`🟢 Grid ready with ${count} unlocked case(s)`);
+  } catch (err) {
+    console.warn("⚠️ Grid not ready in time:", err.message);
+  }
+}
 module.exports = {
   launchBrowser,
   loginToCSGORoll,
   navigateToDailyCases,
   setRiskSlider,
   openDailyCases,
+  waitForGridReady,
 };
