@@ -95,7 +95,6 @@ ipcMain.on("run-bot", async (event, settings) => {
     await loginToCSGORoll(page, userSettings.email, userSettings.password);
     await navigateToDailyCases(page);
     await setRiskSlider(page, userSettings.risk);
-    await page.waitForSelector();
     await openDailyCases(page);
 
     // Next steps:

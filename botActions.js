@@ -8,6 +8,10 @@ const isoWeek = require("dayjs/plugin/isoWeek");
 dayjs.extend(isoWeek);
 puppeteer.use(StealthPlugin());
 
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function launchBrowser() {
   const browser = await puppeteer.launch({ headless: false });
   const [page] = await browser.pages();
@@ -101,7 +105,7 @@ async function setRiskSlider(page, risk) {
       visible: true,
       timeout: 5000,
     });
-    await page.waitForTimeout(1000);
+    await delay(1000);
     console.log("Case grid reloaded.");
   } catch (e) {
     console.warn("Timeout waiting for case grid to reload. Continuing anyway.");
@@ -130,7 +134,8 @@ async function openDailyCases(page) {
       console.log(`🎁 Clicking 'Open 1 time'`);
       await page.click(openBtnSelector);
 
-      await page.waitForTimeout(8000); // Wait for animation
+      await delay(8000);
+
       await captureScreenshots(page);
     } catch (err) {
       console.warn("⚠️ Failed to open case:", err.message);
@@ -144,7 +149,7 @@ async function openDailyCases(page) {
       visible: true,
       timeout: 5000,
     });
-    await page.waitForTimeout(1500); // Allow case grid to refresh
+    await delay(1500);
   }
 }
 
