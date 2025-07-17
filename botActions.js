@@ -6,7 +6,6 @@ const dayjs = require("dayjs");
 const isoWeek = require("dayjs/plugin/isoWeek");
 
 dayjs.extend(isoWeek);
-
 puppeteer.use(StealthPlugin());
 
 async function launchBrowser() {
@@ -16,7 +15,7 @@ async function launchBrowser() {
   await page.setUserAgent(
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115 Safari/537.36"
   );
-  await page.setViewport({ width: 1280, height: 800 });
+  await page.setViewport({ width: 1920, height: 1280 });
 
   return { browser, page };
 }
@@ -93,31 +92,59 @@ async function setRiskSlider(page, risk) {
   await page.mouse.up();
 
   console.log(`Slider set to ${risk}%`);
+
+  try {
+    await page
+      .waitForSelector(".grid", { hidden: true, timeout: 3000 })
+      .catch(() => {});
+    await page.waitForSelector(".grid .card-wrapper", {
+      visible: true,
+      timeout: 5000,
+    });
+    await page.waitForTimeout(1000);
+    console.log("Case grid reloaded.");
+  } catch (e) {
+    console.warn("Timeout waiting for case grid to reload. Continuing anyway.");
+  }
 }
 
 async function openDailyCases(page) {
-  try {
-    const caseSelectors = await page.evaluate(() => {
-      const buttons = [...document.querySelectorAll(".grid button")];
-      return buttons
-        .filter((btn) => !btn.disabled)
-        .map((btn, index) => `.grid button:nth-of-type(${index + 1})`);
+  while (true) {
+    const caseLinks = await getUnlockedCaseLinks(page);
+
+    if (caseLinks.length === 0) {
+      console.log("✅ All available cases opened.");
+      break;
+    }
+
+    const caseUrl = caseLinks[0];
+    console.log(`🧭 Navigating to: ${caseUrl}`);
+    await page.goto(caseUrl, { waitUntil: "networkidle2" });
+
+    const openBtnSelector = 'button[data-test="open-box-button"]';
+    try {
+      await page.waitForSelector(openBtnSelector, {
+        visible: true,
+        timeout: 5000,
+      });
+      console.log(`🎁 Clicking 'Open 1 time'`);
+      await page.click(openBtnSelector);
+
+      await page.waitForTimeout(8000); // Wait for animation
+      await captureScreenshots(page);
+    } catch (err) {
+      console.warn("⚠️ Failed to open case:", err.message);
+    }
+
+    await page.goto("https://www.csgoroll.com/cases/daily-free", {
+      waitUntil: "networkidle2",
     });
 
-    console.log(`Found ${caseSelectors.length} cases to open.`);
-
-    for (const selector of caseSelectors) {
-      try {
-        await page.click(selector);
-        console.log(`Opened case: ${selector}`);
-        await page.waitForTimeout(1000);
-        await captureScreenshots(page);
-      } catch (err) {
-        console.warn(`Failed to click ${selector}`, err);
-      }
-    }
-  } catch (err) {
-    console.error("Failed to open daily cases:", err);
+    await page.waitForSelector(".grid .card-wrapper", {
+      visible: true,
+      timeout: 5000,
+    });
+    await page.waitForTimeout(1500); // Allow case grid to refresh
   }
 }
 
@@ -142,7 +169,15 @@ async function captureScreenshots(page) {
 
   const screenshotFile = path.join(folderPath, `item-${Date.now()}.png`);
   await page.screenshot({ path: screenshotFile });
-  console.log(`Saved screenshot: ${screenshotFile}`);
+  console.log(`📸 Saved screenshot: ${screenshotFile}`);
+}
+
+async function getUnlockedCaseLinks(page) {
+  return await page.evaluate(() => {
+    return Array.from(document.querySelectorAll("a.img-container"))
+      .map((el) => el.href)
+      .filter(Boolean);
+  });
 }
 
 module.exports = {
