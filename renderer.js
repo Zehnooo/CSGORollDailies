@@ -11,6 +11,10 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
+    const rememberMe = document.getElementById("rememberMe");
+    if (rememberMe.isChecked) {
+    }
+
     ipcRenderer.send("credentials-entered", { email, password });
   });
 });

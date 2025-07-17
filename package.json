@@ -11,6 +11,8 @@
     "tailwindcss": "^3.4.17"
   },
   "dependencies": {
+    "electron-store": "^10.1.0",
+    "keytar": "^7.9.0",
     "puppeteer": "^24.14.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
