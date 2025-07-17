@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
-const path = require("path");
+
 const Store = require("electron-store");
 const keytar = require("keytar");
 
@@ -9,7 +9,7 @@ const {
   navigateToDailyCases,
   setRiskSlider,
   openDailyCases,
-  waitForGridReady,
+
   // eventually also: captureScreenshots, cleanOldScreenshots
 } = require("./botActions");
 
@@ -96,7 +96,6 @@ ipcMain.on("run-bot", async (event, settings) => {
     await loginToCSGORoll(page, userSettings.email, userSettings.password);
     await navigateToDailyCases(page);
     await setRiskSlider(page, userSettings.risk);
-    await waitForGridReady(page);
     await openDailyCases(page);
 
     // Next steps:

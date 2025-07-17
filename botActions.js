@@ -58,12 +58,6 @@ async function loginToCSGORoll(page, email, password) {
   console.log("Login complete");
 }
 
-async function navigateToDailyCases(page) {
-  await page.goto("https://www.csgoroll.com/cases/daily-free", {
-    waitUntil: "networkidle2",
-  });
-}
-
 async function setRiskSlider(page, risk) {
   const riskMap = {
     5: 0.0,
@@ -97,23 +91,27 @@ async function setRiskSlider(page, risk) {
 
   console.log(`Slider set to ${risk}%`);
 
-  try {
-    await page.waitForSelector(".grid .card-wrapper", {
-      visible: true,
-      timeout: 5000,
-    });
-    await delay(1000);
-    console.log("Case grid reloaded.");
-  } catch (e) {
-    console.warn("Timeout waiting for case grid to reload. Continuing anyway.");
-  }
+  await delay(7000);
+  console.log("Case grid reloaded.");
 }
 
 async function openDailyCases(page) {
-  while (true) {
-    await waitForGridReady(page);
-    const caseLinks = await getUnlockedCaseLinks(page);
+  const gridUrl = "https://www.csgoroll.com/cases/daily-free";
 
+  // Do not navigate at the start — you're already there
+  while (true) {
+    // Wait for at least one unlocked case button
+    try {
+      await page.waitForSelector(
+        'button[data-test="open-case"]:not([disabled])',
+        { timeout: 7000 }
+      );
+    } catch {
+      console.warn("⚠️ No unlocked cases found.");
+      break;
+    }
+
+    const caseLinks = await getUnlockedCaseLinks(page);
     if (caseLinks.length === 0) {
       console.log("✅ All available cases opened.");
       break;
@@ -121,65 +119,35 @@ async function openDailyCases(page) {
 
     const caseUrl = caseLinks[0];
     console.log(`🧭 Navigating to: ${caseUrl}`);
+    await page.goto(caseUrl, { waitUntil: "networkidle2" });
+
     try {
-      await page.waitForFunction(
-        () => {
-          const btn = document.querySelector(
-            'button[data-test="open-box-button"]'
-          );
-          return btn && !btn.disabled;
-        },
-        { timeout: 7000 }
-      );
+      const openBtnSelector = 'button[data-test="open-box-button"]';
 
-      console.log(`🎁 Clicking 'Open 1 time'`);
-      await page.click('button[data-test="open-box-button"]');
-
-      // Wait for item image (see Fix 3 from previous message)
-      await page.waitForSelector("img.item-preview", {
-        visible: true,
-        timeout: 10000,
-      });
-
-      await captureScreenshots(page);
-    } catch (err) {
-      console.warn("⚠️ Failed to open case or wait for reward:", err.message);
-    }
-
-    const openBtnSelector = 'button[data-test="open-box-button"]';
-    try {
-      await page.waitForSelector(openBtnSelector, {
-        visible: true,
-        timeout: 5000,
+      await page.waitForSelector(`${openBtnSelector}:not([disabled])`, {
+        timeout: 7000,
       });
       console.log(`🎁 Clicking 'Open 1 time'`);
       await page.click(openBtnSelector);
 
-      try {
-        await page.waitForFunction(
-          () => {
-            const previewImg = document.querySelector("img.item-preview");
-            return (
-              previewImg && previewImg.complete && previewImg.naturalHeight > 0
-            );
-          },
-          { timeout: 10000 }
-        );
-      } catch (e) {
-        console.warn("⚠️ No reward image detected after opening case.");
-      }
+      await page.waitForFunction(
+        (selector) => {
+          const btn = document.querySelector(selector);
 
+          return btn && btn.disabled;
+        },
+        { timeout: 10000 },
+        openBtnSelector
+      );
+
+      await delay(1000);
       await captureScreenshots(page);
     } catch (err) {
-      console.warn("⚠️ Failed to open case:", err.message);
+      console.warn("⚠️ Failed to open case or detect reward:", err.message);
     }
 
-    await page.goto("https://www.csgoroll.com/cases/daily-free", {
-      waitUntil: "networkidle2",
-    });
-
-    await waitForGridReady(page);
-
+    // ✅ Now go back to grid for the next case
+    await page.goto(gridUrl, { waitUntil: "networkidle2" });
     await delay(1500);
   }
 }
@@ -232,32 +200,16 @@ async function getUnlockedCaseLinks(page) {
   });
 }
 
-async function waitForGridReady(page) {
-  try {
-    await page.waitForFunction(
-      () => {
-        const buttons = document.querySelectorAll(
-          'button[data-test="open-case"]'
-        );
-        return Array.from(buttons).some((btn) => !btn.disabled);
-      },
-      { timeout: 7000 }
-    );
-
-    const count = await page.$$eval(
-      'button[data-test="open-case"]:not([disabled])',
-      (btns) => btns.length
-    );
-    console.log(`🟢 Grid ready with ${count} unlocked case(s)`);
-  } catch (err) {
-    console.warn("⚠️ Grid not ready in time:", err.message);
-  }
+async function navigateToDailyCases(page) {
+  await page.goto("https://www.csgoroll.com/cases/daily-free", {
+    waitUntil: "networkidle2",
+  });
 }
+
 module.exports = {
   launchBrowser,
   loginToCSGORoll,
   navigateToDailyCases,
   setRiskSlider,
   openDailyCases,
-  waitForGridReady,
 };
