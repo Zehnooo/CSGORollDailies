@@ -110,7 +110,8 @@ async function openDailyCases(page) {
       try {
         await page.click(selector);
         console.log(`Opened case: ${selector}`);
-        await page.waitForTimeout(1000); // Adjust delay if needed
+        await page.waitForTimeout(1000);
+        await captureScreenshots(page);
       } catch (err) {
         console.warn(`Failed to click ${selector}`, err);
       }
