@@ -71,3 +71,14 @@ ipcRenderer.on("show-settings", () => {
     ipcRenderer.send("run-bot", { autoStash, risk });
   });
 });
+
+ipcRenderer.on("show-gallery", () => {
+  document.body.innerHTML = `
+    <header class="bg-indigo-900 p-2 text-white">
+      <h2>Daily Case Gallery</h2>
+    </header>
+    <main class="p-4 text-white">
+      <div id="weekly-gallery" class="grid grid-cols-2 gap-4"></div>
+    </main>
+  `;
+});

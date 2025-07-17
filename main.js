@@ -1,10 +1,14 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+const fs = require("fs");
 const path = require("path");
+const os = require("os");
 const Store = require("electron-store");
 const keytar = require("keytar");
-
+const dayjs = require("dayjs");
+const isoWeek = require("dayjs/plugin/isoWeek");
+dayjs.extend(isoWeek);
 const store = new Store();
 
 puppeteer.use(StealthPlugin());
